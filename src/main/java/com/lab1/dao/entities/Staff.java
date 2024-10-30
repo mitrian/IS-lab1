@@ -1,4 +1,4 @@
-package com.lab1.dao;
+package com.lab1.dao.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,21 +9,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "locations")
+@Table(name = "staff")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Location extends BaseEntity{
+public class Staff extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private long x;
+    private String name;
 
-    private Long y; //не null
-
-    private Float z; //не null
-
-    private String name; //длина не больше 915, мб null
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Organization organization;
 }

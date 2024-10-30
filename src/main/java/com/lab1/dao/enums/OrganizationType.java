@@ -1,4 +1,4 @@
-package com.lab1.dao;
+package com.lab1.dao.enums;
 
 
 public enum OrganizationType {

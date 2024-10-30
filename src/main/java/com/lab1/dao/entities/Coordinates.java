@@ -1,4 +1,4 @@
-package com.lab1.dao;
+package com.lab1.dao.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;

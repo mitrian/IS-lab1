@@ -1,5 +1,6 @@
-package com.lab1.dao;
+package com.lab1.dao.entities;
 
+import com.lab1.dao.enums.OrganizationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

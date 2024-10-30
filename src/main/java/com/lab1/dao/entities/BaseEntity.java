@@ -1,4 +1,4 @@
-package com.lab1.dao;
+package com.lab1.dao.entities;
 
 import com.lab1.exceptions.entity.EntityCreatorException;
 import jakarta.persistence.MappedSuperclass;
