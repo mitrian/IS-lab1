@@ -10,5 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, Integer> {
+    Optional<Organization> findByIdAndCreatedBy(int id, String username);
     boolean existsByCoordinates(Coordinates coordinates);
 }
