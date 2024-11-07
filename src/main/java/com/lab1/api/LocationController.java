@@ -1,4 +1,4 @@
-package com.lab1;
+package com.lab1.api;
 
 
 import com.lab1.dto.LocationRequestDTO;
