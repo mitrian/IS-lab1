@@ -1,5 +1,6 @@
 package com.lab1.dao.repositories;
 
+import com.lab1.dao.entities.Address;
 import com.lab1.dao.entities.Coordinates;
 import com.lab1.dao.entities.Organization;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ import java.util.Optional;
 public interface OrganizationRepository extends JpaRepository<Organization, Integer> {
     Optional<Organization> findByIdAndCreatedBy(int id, String username);
     boolean existsByCoordinates(Coordinates coordinates);
+    boolean existsByOfficialAddress(Address address);
+    boolean existsByPostalAddress(Address address);
 }
