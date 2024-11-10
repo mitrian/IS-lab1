@@ -1,5 +1,6 @@
 package com.lab1.api.util;
 
+import com.lab1.dto.ExceptionResponseDTO;
 import com.lab1.exceptions.UnauthorizedUserException;
 import com.lab1.exceptions.entity.EntityAbsenceException;
 import com.lab1.exceptions.entity.EntityInaccessibleDeleteException;

@@ -14,7 +14,7 @@ import lombok.Setter;
 @Table(name = "addresses")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Address extends BaseEntity {
+public class Address extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

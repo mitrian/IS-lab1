@@ -12,7 +12,7 @@ import lombok.Setter;
 @Table(name = "locations")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Location extends BaseEntity {
+public class Location extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

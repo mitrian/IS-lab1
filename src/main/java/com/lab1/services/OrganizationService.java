@@ -25,12 +25,14 @@ public class OrganizationService {
     private final OrganizationRepository organizationRepository;
     private final AddressRepository addressRepository;
     private final CoordinatesRepository coordinatesRepository;
+    private final StaffRepository staffRepository;
     private final SecurityService securityService;
 
     public OrganizationService(OrganizationRepository organizationRepository, AddressRepository addressRepository, CoordinatesRepository coordinatesRepository, StaffRepository staffRepository, SecurityService securityService) {
         this.organizationRepository = organizationRepository;
         this.addressRepository = addressRepository;
         this.coordinatesRepository = coordinatesRepository;
+        this.staffRepository = staffRepository;
         this.securityService = securityService;
     }
 

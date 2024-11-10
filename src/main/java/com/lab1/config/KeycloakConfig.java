@@ -1,7 +1,5 @@
 package com.lab1.config;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -12,6 +10,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
+
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +26,11 @@ public class KeycloakConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         httpRequests -> httpRequests
+                                .requestMatchers("/api/v1/coordinates/**").permitAll()
+                                .requestMatchers("/api/v1/locations/**").permitAll()
+                                .requestMatchers("/api/v1/address/**").permitAll()
+                                .requestMatchers("/api/v1/organization/**").permitAll()
+                                .requestMatchers("/api/v1/staff/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS))

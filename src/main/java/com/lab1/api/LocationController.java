@@ -1,6 +1,5 @@
 package com.lab1.api;
 
-
 import com.lab1.dto.LocationRequestDTO;
 import com.lab1.dto.LocationResponseDTO;
 import com.lab1.services.LocationService;

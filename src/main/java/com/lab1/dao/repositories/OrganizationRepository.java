@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, Integer> {
     Optional<Organization> findByIdAndCreatedBy(int id, String username);
+    void deleteByIdAndCreatedBy(Long id, String username);
     boolean existsByCoordinates(Coordinates coordinates);
     boolean existsByOfficialAddress(Address address);
     boolean existsByPostalAddress(Address address);
@@ -23,4 +23,5 @@ public interface OrganizationRepository extends JpaRepository<Organization, Inte
     @Query("SELECT COUNT(o) FROM Organization o WHERE o.rating > :minRating")
     long countByRatingGreaterThan(@Param("minRating") int minRating);
     List<Organization> findByFullNameStartingWith(String prefix);
+
 }

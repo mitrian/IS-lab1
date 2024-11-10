@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-
 @Repository
 public interface CoordinatesRepository extends JpaRepository<Coordinates, Long> {
     Optional<Coordinates> findByIdAndCreatedBy(Long id, String username);

@@ -17,6 +17,6 @@ public class DemoController {
     @GetMapping("/two")
     @PreAuthorize("hasRole('ADMIN')")
     public String demoVlad() {
-        return "Pumba is the best!)";
+        return "Piba is the best!)";
     }
 }
