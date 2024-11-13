@@ -1,0 +1,48 @@
+/* Основной контейнер с Flexbox */
+.coordination-container {
+    display: flex;
+    flex-direction: row; /* Располагаем дочерние элементы (button-panel и info-panel) в ряд */
+    gap: 20px;
+    align-items: flex-start; /* Выравниваем элементы по верху */
+    padding: 20px;
+  }
+  
+  /* Панель кнопок */
+  .coordination-button-panel {
+    display: flex;
+    flex-direction: column; /* Располагаем кнопки друг под другом */
+    gap: 10px; /* Расстояние между кнопками */
+  }
+  
+  /* Информационная панель */
+  .info-panel {
+    flex: 1; /* Занимает оставшееся пространство */
+    padding: 10px;
+    border: 1px solid #ccc; /* Добавим границу для визуального выделения */
+    border-radius: 5px;
+    background-color: #f9f9f9; /* Легкий фон для отличия */
+  }
+  
+  .coord-button.medium {
+    width: 200px; /* фиксированная ширина */
+    height: 50px; /* фиксированная высота */
+    font-size: 18px; /* размер шрифта */
+    padding: 12px; /* отступы */
+  }
+
+  .input-panel {
+    margin-bottom: 20px;
+  }
+  
+  .input-panel label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .input-panel .p-inputtext {
+    width: 100%;
+  }
+
+  
+
+  
