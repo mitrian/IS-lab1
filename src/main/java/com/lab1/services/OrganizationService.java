@@ -43,11 +43,10 @@ public class OrganizationService {
 
 
     public OrganizationResponseDTO getOrganizationById(int id) {
-        Optional<Organization> organizationOptional = organizationRepository.findById(id);
-        if (organizationOptional.isPresent()) {
-            return fromEntity(organizationOptional.get());
-        }
-        throw new OrganizationAbsenceException("Organization с данным id не существует");
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new OrganizationAbsenceException("Organization с данным id не существует"));
+
+        return fromEntity(organization);
     }
 
 
@@ -61,34 +60,23 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationResponseDTO updateOrganization(int id, OrganizationRequestDTO organizationRequestDTO) {
-        Optional<Organization> organizationOptional = organizationRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (organizationOptional.isPresent()) {
-            Organization organization = organizationOptional.get();
+        Organization organization = organizationRepository.findByIdAndCreatedBy(id, securityService.findUserName())
+                .orElseThrow(() -> new OrganizationUpdateException("Сущности Organization, принадлежащей Вам, с таким id не существует"));
 
-            Optional<Coordinates> coordinatesOptional = coordinatesRepository.findById(organizationRequestDTO.coordinatesId());
-            if (coordinatesOptional.isPresent()) {
-                organization.setCoordinates(coordinatesOptional.get());
-            } else {
-                throw new CoordinatesAbsenceException("Coordinates с данным id не существует");
-            }
+        Coordinates coordinates = coordinatesRepository.findById(organizationRequestDTO.coordinatesId())
+                .orElseThrow(() -> new CoordinatesAbsenceException("Coordinates с данным id не существует"));
+        organization.setCoordinates(coordinates);
 
-            Optional<Address> officialAddressOptional = addressRepository.findById(organizationRequestDTO.officialAddressId());
-            if (officialAddressOptional.isPresent()) {
-                organization.setOfficialAddress(officialAddressOptional.get());
-            } else{
-                throw new AddressAbsenceException("Address с данным id не существует");
-            }
+        Address officialAddress = addressRepository.findById(organizationRequestDTO.officialAddressId())
+                .orElseThrow(() -> new AddressAbsenceException("Address с данным id не существует"));
+        organization.setOfficialAddress(officialAddress);
 
-            Optional<Address> postalAddressOptional = addressRepository.findById(organizationRequestDTO.officialAddressId());
-            if (postalAddressOptional.isPresent()) {
-                organization.setPostalAddress(postalAddressOptional.get());
-            } else{
-                throw new AddressAbsenceException("Address с данным id не существует");
-            }
-            Organization updatedOrganization = organizationRepository.save(organization);
-            return fromEntity(updatedOrganization);
-        }
-        throw new OrganizationUpdateException("Сущности Organization, принадлежащей Вам, с таким id не существует");
+        Address postalAddress = addressRepository.findById(organizationRequestDTO.postalAddressId()) // fixed the second address id to be postalAddressId
+                .orElseThrow(() -> new AddressAbsenceException("Address с данным id не существует"));
+        organization.setPostalAddress(postalAddress);
+        Organization updatedOrganization = organizationRepository.save(organization);
+
+        return fromEntity(updatedOrganization);
     }
 
 

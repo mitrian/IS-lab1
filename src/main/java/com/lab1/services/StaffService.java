@@ -23,12 +23,12 @@ public class StaffService {
     private final OrganizationRepository organizationRepository;
     private final SecurityService securityService;
 
-
     public StaffService(StaffRepository staffRepository, OrganizationRepository organizationRepository, SecurityService securityService) {
         this.staffRepository = staffRepository;
         this.organizationRepository = organizationRepository;
         this.securityService = securityService;
     }
+
 
     public Page<StaffResponseDTO> findAllStaff(Pageable pageable) {
         return staffRepository.findAll(pageable).map(this::fromEntity);
@@ -36,11 +36,10 @@ public class StaffService {
 
 
     public StaffResponseDTO findStaffById(Long id) {
-        Optional<Staff> staff = staffRepository.findById(id);
-        if (staff.isPresent()) {
-            return fromEntity(staff.get());
-        }
-        throw new StaffAbsenceException("Staff с данным id не существует");
+        Staff staff = staffRepository.findById(id)
+                .orElseThrow(() -> new StaffAbsenceException("Staff с данным id не существует"));
+
+        return fromEntity(staff);
     }
 
 
@@ -52,23 +51,21 @@ public class StaffService {
     }
 
 
+    @Transactional
     public StaffResponseDTO updateStaff(Long id, StaffRequestDTO staffRequestDTO) {
-        Optional<Staff> staffOptional = staffRepository.findById(id);
-        if (staffOptional.isPresent() && staffOptional.get().getCreatedBy().equals(securityService.findUserName())) {
-            Staff staff = staffOptional.get();
-            staff.setName(staffRequestDTO.name());
-            Optional<Organization> organizationOptional = organizationRepository.findByIdAndCreatedBy(
-                    staffRequestDTO.organizationId(),
-                    securityService.findUserName());
-            if (organizationOptional.isPresent()) {
-                staff.setOrganization(organizationOptional.get());
-                Staff savedStaff = staffRepository.save(staff);
-                return fromEntity(savedStaff);
-            } else {
-                throw new OrganizationAbsenceException("Organization с данным id, принадлежащей Вам не существует");
-            }
-        }
-        throw new StaffUpdateException("Сущности Staff с таким id ,принадлежащей Вам, не существует");
+        Staff staff = staffRepository.findByIdAndCreatedBy(id, securityService.findUserName())
+                .orElseThrow(() -> new StaffUpdateException("Сущности Staff с таким id, принадлежащей Вам, не существует"));
+
+        Organization organization = organizationRepository.findByIdAndCreatedBy(
+                        staffRequestDTO.organizationId(), securityService.findUserName())
+                .orElseThrow(() -> new OrganizationAbsenceException("Organization с данным id, принадлежащей Вам не существует"));
+
+        staff.setName(staffRequestDTO.name());
+        staff.setOrganization(organization);
+
+        Staff savedStaff = staffRepository.save(staff);
+
+        return fromEntity(savedStaff);
     }
 
 
@@ -85,6 +82,7 @@ public class StaffService {
     }
 
 
+    @Transactional
     public boolean dismissStaff(int id){
         if (organizationRepository.findByIdAndCreatedBy(id, securityService.findUserName()).isEmpty())
             throw new OrganizationAbsenceException("Такой Organization, принадлежащей вам не существует");
@@ -94,27 +92,29 @@ public class StaffService {
     }
 
 
+    @Transactional
     public StaffResponseDTO assignStaffToOrganization(Long staffId, int organizationId) {
-        if (organizationRepository.findByIdAndCreatedBy(organizationId, securityService.findUserName()).isEmpty()) {
-            throw new OrganizationAbsenceException("Такой Organization, принадлежащей вам не существует");
-        }
-        if (staffRepository.findByIdAndCreatedBy(staffId, securityService.findUserName()).isEmpty()) {
-            throw new StaffAbsenceException("Такой Staff, принадлежащей вам не существует");
-        }
-        if (staffRepository.findById(staffId).get().getOrganization().getId() == organizationId) {
+        Organization organization = organizationRepository.findByIdAndCreatedBy(organizationId, securityService.findUserName())
+                .orElseThrow(() -> new OrganizationAbsenceException("Такой Organization, принадлежащей вам не существует"));
+
+        Staff staff = staffRepository.findByIdAndCreatedBy(staffId, securityService.findUserName())
+                .orElseThrow(() -> new StaffAbsenceException("Такой Staff, принадлежащий вам не существует"));
+
+        if (staff.getOrganization() != null && staff.getOrganization().getId() == organizationId) {
             throw new StaffUpdateException("Staff уже находится в данной организации");
         }
+
+
         staffRepository.updateOrganizationForStaff(staffId, organizationId);
-        Optional<Staff> updatedStaff = staffRepository.findById(staffId);
-        if (updatedStaff.isPresent()) {
-            Staff staff = updatedStaff.get();
-            staff.setOrganization(organizationRepository.findById(organizationId).get());
-            if (staff.getOrganization() == null) {
-                throw new OrganizationAbsenceException("Организация для сотрудника не была назначена");
-            }
-            return fromEntity(staff);
+
+        Staff updatedStaff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new StaffAbsenceException("Не удалось добавить нового сотрудника"));
+
+        if (updatedStaff.getOrganization() == null) {
+            throw new OrganizationAbsenceException("Организация для сотрудника не была назначена");
         }
-        throw new StaffAbsenceException("Не удалось добавить нового сотрудника");
+
+        return fromEntity(updatedStaff);
     }
 
 
@@ -166,6 +166,7 @@ public class StaffService {
         );
     }
 
+
     private StaffResponseDTO fromEntity(Staff staff) {
         if (staff.getOrganization() != null){
             OrganizationResponseDTO organizationResponseDTO = organizationFromStaff(staff.getOrganization());
@@ -181,6 +182,7 @@ public class StaffService {
                 null);
 
     }
+
 
     private Staff toEntity(StaffRequestDTO staffRequestDTO) {
         Staff staff = new Staff();

@@ -41,43 +41,41 @@ public class AddressService {
 
 
     public AddressResponseDTO getAddressById(Long id) {
-        Optional<Address> addressOptional = addressRepository.findById(id);
-        if (addressOptional.isPresent())
-            return addressOptional.map(this::fromEntity).get();
-        throw new AddressAbsenceException("Address с данным id не существует");
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new AddressAbsenceException("Address с данным id не существует"));
+
+        return fromEntity(address);
     }
 
 
     @Transactional
     public AddressResponseDTO createAddress(AddressRequestDTO addressRequestDTO) {
-        Optional<Location> locationOptional = locationRepository.findById(addressRequestDTO.townId());
-        if (locationOptional.isEmpty())
-            throw new LocationAbsenceException("Location с такми id не существует");
+        Location location = locationRepository.findById(addressRequestDTO.townId())
+                .orElseThrow(() -> new LocationAbsenceException("Location с таким id не существует"));
+
         Address address = toEntity(addressRequestDTO);
+        address.setTown(location);
         Address savedAddress = addressRepository.save(address);
+
         return fromEntity(savedAddress);
     }
 
 
     @Transactional
     public AddressResponseDTO updateAddress(Long id, AddressRequestDTO addressRequestDTO) {
-        Optional<Address> addressOptional = addressRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (addressOptional.isPresent()) {
-            Address address = addressOptional.get();
-            if (addressRequestDTO.townId() == null){
-                address.setTown(null);
-            } else {
-                Optional<Location> locationOptional = locationRepository.findById(addressRequestDTO.townId());
-                if (locationOptional.isPresent()) {
-                    address.setTown(locationOptional.get());
-                } else {
-                    address.setTown(null);
-                }
-            }
-            Address updatedAddress = addressRepository.save(address);
-            return fromEntity(updatedAddress);
+        Address address = addressRepository.findByIdAndCreatedBy(id, securityService.findUserName())
+                .orElseThrow(() -> new AddressUpdateException("Сущности Address, принадлежащей Вам, с таким id не существует"));
+
+        if (addressRequestDTO.townId() == null) {
+            address.setTown(null);
+        } else {
+            Location location = locationRepository.findById(addressRequestDTO.townId())
+                    .orElse(null);
+            address.setTown(location);
         }
-        throw new AddressUpdateException("Сущности Address, принадлежащей Вам, с таким id не существует");
+        Address updatedAddress = addressRepository.save(address);
+
+        return fromEntity(updatedAddress);
     }
 
 

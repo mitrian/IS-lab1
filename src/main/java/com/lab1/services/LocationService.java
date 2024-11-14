@@ -36,11 +36,10 @@ public class LocationService {
 
 
     public LocationResponseDTO getLocationById(Long id) {
-        Optional<Location> locationOptional = locationRepository.findById(id);
-        if (locationOptional.isPresent()) {
-            return locationOptional.map(this::fromEntity).get();
-        }
-        throw new LocationAbsenceException("Location с данным id не существует");
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new LocationAbsenceException("Location с данным id не существует"));
+
+        return fromEntity(location);
     }
 
 
@@ -48,21 +47,21 @@ public class LocationService {
     public LocationResponseDTO createLocation(LocationRequestDTO locationRequestDTO) {
         Location location = toEntity(locationRequestDTO);
         Location savedLocation = locationRepository.save(location);
+
         return fromEntity(savedLocation);
     }
 
 
     @Transactional
     public LocationResponseDTO updateLocation(Long id, LocationRequestDTO locationRequestDTO) {
-        Optional<Location> locationOptional = locationRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (locationOptional.isPresent()) {
-            Location location = locationOptional.get();
-            location.setX(locationRequestDTO.x());
-            location.setY(locationRequestDTO.y());
-            Location updatedLocation = locationRepository.save(location);
-            return fromEntity(updatedLocation);
-        }
-        throw  new LocationUpdateException("Сущности Location, принадлежащей Вам, с таким id не существует");
+        Location location = locationRepository.findByIdAndCreatedBy(id, securityService.findUserName())
+                .orElseThrow(() -> new LocationUpdateException("Сущности Location, принадлежащей Вам, с таким id не существует"));
+
+        location.setX(locationRequestDTO.x());
+        location.setY(locationRequestDTO.y());
+        Location updatedLocation = locationRepository.save(location);
+
+        return fromEntity(updatedLocation);
     }
 
 
@@ -91,6 +90,7 @@ public class LocationService {
                 location.getName()
         );
     }
+
 
     private Location toEntity(LocationRequestDTO locationRequestDTO) {
         Location location = new Location();

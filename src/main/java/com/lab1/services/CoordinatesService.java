@@ -35,10 +35,10 @@ public class CoordinatesService {
 
 
     public CoordinatesResponseDTO getCoordinatesById(Long id) {
-        Optional<Coordinates> coordinatesOptional = coordinatesRepository.findById(id);
-        if (coordinatesOptional.isPresent())
-            return coordinatesOptional.map(this::fromEntity).get();
-        throw new CoordinatesAbsenceException("Coordinates с данным id не существует");
+        Coordinates coordinates = coordinatesRepository.findById(id)
+                .orElseThrow(() -> new CoordinatesAbsenceException("Coordinates с данным id не существует"));
+
+        return fromEntity(coordinates);
     }
 
 
@@ -46,21 +46,21 @@ public class CoordinatesService {
     public CoordinatesResponseDTO createCoordinates(CoordinatesRequestDTO coordinatesRequestDTO) {
         Coordinates coordinates = toEntity(coordinatesRequestDTO);
         Coordinates savedCoordinates = coordinatesRepository.save(coordinates);
+
         return fromEntity(savedCoordinates);
     }
 
 
     @Transactional
     public CoordinatesResponseDTO updateCoordinates(Long id, CoordinatesRequestDTO coordinatesRequestDTO) {
-        Optional<Coordinates> coordinatesOptional = coordinatesRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (coordinatesOptional.isPresent()) {
-            Coordinates coordinates = coordinatesOptional.get();
-            coordinates.setX(coordinatesRequestDTO.x());
-            coordinates.setY(coordinatesRequestDTO.y());
-            Coordinates updatedCoordinates = coordinatesRepository.save(coordinates);
-            return fromEntity(updatedCoordinates);
-        }
-        throw new CoordinatesUpdateException("Сущности Coordinates, принадлежащей Вам, с таким id не существует");
+        Coordinates coordinates = coordinatesRepository.findByIdAndCreatedBy(id, securityService.findUserName())
+                .orElseThrow(() -> new CoordinatesUpdateException("Сущности Coordinates, принадлежащей Вам, с таким id не существует"));
+
+        coordinates.setX(coordinatesRequestDTO.x());
+        coordinates.setY(coordinatesRequestDTO.y());
+        Coordinates updatedCoordinates = coordinatesRepository.save(coordinates);
+
+        return fromEntity(updatedCoordinates);
     }
 
 
@@ -80,7 +80,6 @@ public class CoordinatesService {
     }
 
 
-
     private CoordinatesResponseDTO fromEntity(Coordinates coordinates) {
         return new CoordinatesResponseDTO(
                 coordinates.getId(),
@@ -88,6 +87,7 @@ public class CoordinatesService {
                 coordinates.getY()
         );
     }
+
 
     private Coordinates toEntity(CoordinatesRequestDTO coordinatesRequestDTO) {
         Coordinates coordinates = new Coordinates();
