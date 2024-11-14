@@ -94,15 +94,17 @@ public class OrganizationService {
 
     @Transactional
     public boolean deleteOrganization(int id) {
-        Optional<Organization> organizationOptional = organizationRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (organizationOptional.isPresent()) {
-            organizationRepository.delete(organizationOptional.get());
-            return true;
-        }
-        if (organizationRepository.findById(id).isEmpty()) {
-            throw new OrganizationInaccessibleDeleteException("Organization с данным id не существует");
-        }
-        throw new OrganizationInaccessibleDeleteException("У Вас нет доступа к данному объекту Organization");
+        Organization organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new OrganizationInaccessibleDeleteException("Organization с данным id не существует"));
+
+        if (!organization.getCreatedBy().equals(securityService.findUserName()))
+            throw new OrganizationInaccessibleDeleteException("У Вас нет доступа к данному объекту Organization");
+
+        if (staffRepository.existsByOrganizationId(id))
+            throw new OrganizationInaccessibleDeleteException("Этот объект Organization связан с другими. Удаление невозможно");
+
+        organizationRepository.delete(organization);
+        return true;
     }
 
 

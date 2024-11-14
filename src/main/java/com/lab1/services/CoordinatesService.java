@@ -36,9 +36,8 @@ public class CoordinatesService {
 
     public CoordinatesResponseDTO getCoordinatesById(Long id) {
         Optional<Coordinates> coordinatesOptional = coordinatesRepository.findById(id);
-        if (coordinatesOptional.isPresent()) {
+        if (coordinatesOptional.isPresent())
             return coordinatesOptional.map(this::fromEntity).get();
-        }
         throw new CoordinatesAbsenceException("Coordinates с данным id не существует");
     }
 
@@ -67,19 +66,19 @@ public class CoordinatesService {
 
     @Transactional
     public boolean deleteCoordinates(Long id) {
-        Optional<Coordinates> coordinatesOptional = coordinatesRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (coordinatesOptional.isPresent()) {
-            if (organizationRepository.existsByCoordinates(coordinatesOptional.get())) {
-                throw new CoordinatesInaccessibleDeleteException("Этот объект Coordinates связан с другими. Удаление невозможно");
-            }
-            coordinatesRepository.delete(coordinatesOptional.get());
-            return true;
-        }
-        if (coordinatesRepository.findById(id).isEmpty()) {
-            throw new CoordinatesInaccessibleDeleteException("Coordinates с данным id не существует");
-        }
-        throw new CoordinatesInaccessibleDeleteException("У Вас нет доступа к данному объекту Coordinates");
+        Coordinates coordinates = coordinatesRepository.findById(id)
+                .orElseThrow(() -> new CoordinatesInaccessibleDeleteException("Coordinates с данным id не существует"));
+
+        if (!coordinates.getCreatedBy().equals(securityService.findUserName()))
+            throw new CoordinatesInaccessibleDeleteException("У Вас нет доступа к данному объекту Coordinates");
+
+        if (organizationRepository.existsByCoordinates(coordinates))
+            throw new CoordinatesInaccessibleDeleteException("Этот объект Coordinates связан с другими. Удаление невозможно");
+
+        coordinatesRepository.delete(coordinates);
+        return true;
     }
+
 
 
     private CoordinatesResponseDTO fromEntity(Coordinates coordinates) {

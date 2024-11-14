@@ -53,8 +53,8 @@ public class StaffService {
 
 
     public StaffResponseDTO updateStaff(Long id, StaffRequestDTO staffRequestDTO) {
-        Optional<Staff> staffOptional = staffRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (staffOptional.isPresent()) {
+        Optional<Staff> staffOptional = staffRepository.findById(id);
+        if (staffOptional.isPresent() && staffOptional.get().getCreatedBy().equals(securityService.findUserName())) {
             Staff staff = staffOptional.get();
             staff.setName(staffRequestDTO.name());
             Optional<Organization> organizationOptional = organizationRepository.findByIdAndCreatedBy(
@@ -65,7 +65,7 @@ public class StaffService {
                 Staff savedStaff = staffRepository.save(staff);
                 return fromEntity(savedStaff);
             } else {
-                throw new OrganizationAbsenceException("Organizateion с данным id, принадлежащей Вам не существует");
+                throw new OrganizationAbsenceException("Organization с данным id, принадлежащей Вам не существует");
             }
         }
         throw new StaffUpdateException("Сущности Staff с таким id ,принадлежащей Вам, не существует");
@@ -74,24 +74,21 @@ public class StaffService {
 
     @Transactional
     public boolean deleteStaff(Long id) {
-        Optional<Staff> staffOptional = staffRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (staffOptional.isPresent()) {
-            staffRepository.delete(staffOptional.get());
-            return true;
-        }
-        if (staffRepository.findById(id).isEmpty()) {
-            throw new StaffInaccessibleDeleteException("Staff с данным id не существует");
-        }
-        throw new StaffInaccessibleDeleteException("У Вас нет доступа к данному объекту Staff");
+        Staff staff = staffRepository.findById(id)
+                .orElseThrow(() -> new StaffInaccessibleDeleteException("Staff с данным id не существует"));
+
+        if (!staff.getCreatedBy().equals(securityService.findUserName()))
+            throw new StaffInaccessibleDeleteException("У Вас нет доступа к данному объекту Staff");
+
+        staffRepository.delete(staff);
+        return true;
     }
 
 
     public boolean dismissStaff(int id){
-        System.out.println("AAAAAAA");
-        if (organizationRepository.findByIdAndCreatedBy(id, securityService.findUserName()).isEmpty()) {
+        if (organizationRepository.findByIdAndCreatedBy(id, securityService.findUserName()).isEmpty())
             throw new OrganizationAbsenceException("Такой Organization, принадлежащей вам не существует");
-        }
-        System.out.println("BBBBBBBB");
+
         staffRepository.setOrganizationToNullByOrganizationId(id);
         return true;
     }

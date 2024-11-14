@@ -68,19 +68,19 @@ public class LocationService {
 
     @Transactional
     public boolean deleteLocation(Long id) {
-        Optional<Location> locationOptional = locationRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        if (locationOptional.isPresent()) {
-            if (addressRepository.existsByTown(locationOptional.get())) {
-                throw new CoordinatesInaccessibleDeleteException("Этот объект Location связан с другими. Удаление невозможно");
-            }
-            locationRepository.delete(locationOptional.get());
-            return true;
-        }
-        if (locationRepository.findById(id).isEmpty()) {
-            throw new LocationInaccessibleDeleteException("Location с данным id не существует");
-        }
-        throw new LocationInaccessibleDeleteException("У Вас нет доступа к данному объекту Location");
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new LocationInaccessibleDeleteException("Location с данным id не существует"));
+
+        if (!location.getCreatedBy().equals(securityService.findUserName()))
+            throw new LocationInaccessibleDeleteException("У Вас нет доступа к данному объекту Location");
+
+        if (addressRepository.existsByTown(location))
+            throw new CoordinatesInaccessibleDeleteException("Этот объект Location связан с другими. Удаление невозможно");
+
+        locationRepository.delete(location);
+        return true;
     }
+
 
     private LocationResponseDTO fromEntity(Location location) {
         return new LocationResponseDTO(

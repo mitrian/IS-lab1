@@ -42,9 +42,8 @@ public class AddressService {
 
     public AddressResponseDTO getAddressById(Long id) {
         Optional<Address> addressOptional = addressRepository.findById(id);
-        if (addressOptional.isPresent()) {
+        if (addressOptional.isPresent())
             return addressOptional.map(this::fromEntity).get();
-        }
         throw new AddressAbsenceException("Address с данным id не существует");
     }
 
@@ -52,7 +51,8 @@ public class AddressService {
     @Transactional
     public AddressResponseDTO createAddress(AddressRequestDTO addressRequestDTO) {
         Optional<Location> locationOptional = locationRepository.findById(addressRequestDTO.townId());
-        if (locationOptional.isEmpty()) throw new LocationAbsenceException("Location с такми id не существует");
+        if (locationOptional.isEmpty())
+            throw new LocationAbsenceException("Location с такми id не существует");
         Address address = toEntity(addressRequestDTO);
         Address savedAddress = addressRepository.save(address);
         return fromEntity(savedAddress);
@@ -83,22 +83,20 @@ public class AddressService {
 
     @Transactional
     public boolean deleteAddress(Long id) {
-        System.out.println("AUFUHSVWIUREWIUVRBNIVREBVERIBVIWUERBVIRUEWBVIUERBVIUERBVI");
-        Optional<Address> addressOptional = addressRepository.findByIdAndCreatedBy(id, securityService.findUserName());
-        System.out.println(addressOptional.isPresent());
-        if (addressOptional.isPresent()) {
-            if (organizationRepository.existsByOfficialAddress(addressOptional.get()) ||
-                organizationRepository.existsByPostalAddress(addressOptional.get())) {
-                throw new AddressInaccessibleDeleteDeleteException("Этот объект Address связан с другими. Удаление невозможно");
-            }
-            addressRepository.delete(addressOptional.get());
-            return true;
-        }
-        if (addressRepository.findById(id).isEmpty()) {
-            throw new AddressInaccessibleDeleteDeleteException("Address с данным id не существует");
-        }
-        throw new AddressInaccessibleDeleteDeleteException("У Вас нет доступа к данному объекту Address");
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new AddressInaccessibleDeleteDeleteException("Address с данным id не существует"));
+
+        if (!address.getCreatedBy().equals(securityService.findUserName()))
+            throw new AddressInaccessibleDeleteDeleteException("У Вас нет доступа к данному объекту Address");
+
+        if (organizationRepository.existsByOfficialAddress(address) ||
+                organizationRepository.existsByPostalAddress(address))
+            throw new AddressInaccessibleDeleteDeleteException("Этот объект Address связан с другими. Удаление невозможно");
+
+        addressRepository.delete(address);
+        return true;
     }
+
 
     private AddressResponseDTO fromEntity(Address address) {
         LocationResponseDTO locationResponseDTO = new LocationResponseDTO(
@@ -117,7 +115,6 @@ public class AddressService {
 
 
     private Address toEntity(AddressRequestDTO addressRequestDTO) {
-        System.out.println(addressRequestDTO.townId());
         Optional<Location> locationOptional = locationRepository.findById(addressRequestDTO.townId());
         Address address = new Address();
         address.setZipCode(addressRequestDTO.zipCode());

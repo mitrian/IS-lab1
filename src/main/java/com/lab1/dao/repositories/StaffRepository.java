@@ -11,14 +11,14 @@ import java.util.Optional;
 
 public interface StaffRepository extends JpaRepository<Staff, Long> {
     Optional<Staff> findByIdAndCreatedBy(long id, String username);
-
     @Modifying
     @Transactional
     @Query("UPDATE Staff s SET s.organization = NULL WHERE s.organization.id = :organizationId")
     void setOrganizationToNullByOrganizationId(@Param("organizationId") int organizationId);
-
     @Modifying
     @Transactional
     @Query("UPDATE Staff s SET s.organization.id = :organizationId WHERE s.id = :staffId")
     void updateOrganizationForStaff(@Param("staffId") Long staffId, @Param("organizationId") int organizationId);
+    @Query("SELECT COUNT(s) > 0 FROM Staff s WHERE s.organization.id = :organizationId")
+    boolean existsByOrganizationId(@Param("organizationId") int organizationId);
 }

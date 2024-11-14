@@ -60,8 +60,6 @@ public class StaffController {
     //id - staff, которого назнач
     @PutMapping("/assign/{staffId}/{organizationId}")
     public StaffResponseDTO assignStaff(@PathVariable Long staffId, @PathVariable int organizationId) {
-        System.out.println(staffId);
-        System.out.println(organizationId);
         return staffService.assignStaffToOrganization(staffId, organizationId);
     }
 
