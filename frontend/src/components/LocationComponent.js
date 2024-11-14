@@ -7,7 +7,7 @@ import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import '../css/CoordinationComponent.css';
 import { getEntities, getEntityById, createEntity, deleteEntityById, updateEntityById } from '../Api';
-import { useDispatch } from 'react-redux';
+
 
 let createLocationBody = {
     "x": 7,

@@ -18,20 +18,6 @@ import ExtraComponent from './components/ExtraComponent.js';
 
 
 const App = () => {
-
-  const [infoMessage, setInfoMessage] = useState('');
-
-  const dispatch = useDispatch()
-  const cash = useSelector(state => state.cash)
-
-  const showStateValue = () => {
-    console.log(cash)
-  }
-
-
-
-
-
   
 return (
   <div >

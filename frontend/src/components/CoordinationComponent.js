@@ -8,6 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import '../css/CoordinationComponent.css';
 import { getEntities, getEntityById, createEntity, deleteEntityById, updateEntityById } from '../Api';
 
+
 let createCoordinatesBody = {
   "x": -1,
   "y": 57

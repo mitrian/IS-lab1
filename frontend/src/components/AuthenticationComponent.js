@@ -4,9 +4,7 @@ import "primereact/resources/primereact.min.css";
 import '/node_modules/primeflex/primeflex.css';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
-import { TabView, TabPanel } from 'primereact/tabview';
 import Keycloak from 'keycloak-js';
-import { useDispatch, useSelector } from 'react-redux';
 import {keyCloakInitOptions} from '../Conf';
 
 
